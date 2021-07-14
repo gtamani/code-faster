@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba Vue</title>
+    <style>
+        #red{
+            background-color: red;
+        }
+        #green{
+            background-color: greenyellow;
+        }
+    </style>
+</head>
+<body>
+    
+    
+    
+    <main v-on:keydown="keyPressed">
+        <div id="clock" v-if="show">
+            {{minutes}} : {{seconds}}      - {{speed}}
+        </div>
+        
+        <button @click="changeVisibility">Show/Don't show next letter</button>
+        <div>
+            <prompter
+            :well = "position"
+            :wrong = "lettersToPosition"
+            ></prompter>
+        </div>
+        <div v-if="show">
+            {{ nextLetter }} - {{position}} - {{lettersToPosition}} - {{words}}
+        </div>
+        <input type="text">
+        
+    <main>
+
+    
+
+    <!-- Vue JS -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script>
+
+        let text = "Sin embargo, la posibilidad de utilizar publicidad en Wikipedia provocó una reacción de parte de los contribuyentes de la Wikipedia en español, motivo que llevó a la creación de la Enciclopedia Libre Universal en Español en febrero de 2002."
+
+        var app = new Vue({
+            el: 'main',
+            data: {
+
+                // Text data
+                show: true,
+                text: text,  
+                position: 0,
+                lettersToPosition: 0,
+                words: 0,
+                nextLetter: text[0],
+                started: new Date(Date.now()),
+                
+
+                // Clock data
+                minutes: 0,
+                seconds: 0,
+                miliseconds: 0,
+                difference: 0,
+                speed: 0,
+
+            },
+            created(){
+                this.loop();
+            },
+            methods: {
+
+                changeVisibility: function() {
+                    this.show = !this.show
+                },
+
+                keyPressed: function(e) {
+                    unvalidKeyCodes = [17,16,20,9,18,27,222,13]
+                    sameLetter = e.key == this.nextLetter ? true : false;
+                    
+                    if (unvalidKeyCodes.indexOf(e.keyCode) == -1) {
+                        if (sameLetter && this.lettersToPosition == 0) {
+                            this.position += 1;
+                            const next = this.text[this.position];
+                            if (next == " ") {this.words += 1}
+                            this.nextLetter = next;
+                        } else {
+                            if (e.key == "Backspace") {
+                                if (this.position >= 0) {
+                                    if (this.lettersToPosition == 0) {
+                                        this.position -= 1
+                                        const next = this.text[this.position];
+                                        this.nextLetter = next;
+                                    } else {
+                                        this.lettersToPosition -= 1;
+                                    }
+                                }
+                            } else {
+                                this.lettersToPosition += 1;
+                            }
+                        }
+                        
+                    }
+                },
+
+                update: function() {
+                    let date = new Date(Date.now()) 
+                    this.difference = date.getTime() - this.started.getTime();
+                    this.minutes = parseInt(this.difference / 60000);
+                    this.seconds = (this.difference-this.minutes*60000) / 1000;
+                    this.speed = 60000 / (this.difference/this.words)
+                },
+
+                loop: function() {
+                    setInterval(() => {
+                        this.update()
+                    }, 15);
+                }
+            }
+        })
+
+
+        Vue.component("prompter",{
+            props: {
+                well: Number,
+                wrong: Number,
+            },
+            template: "<div v-html = renderized></div>",
+            computed: {
+                renderized(){
+                    return "<span id='green'>"+text.slice(0,this.well)+"</span><span id='red'>"+text.slice(this.well,this.well+this.wrong)+"</span>"+text.slice(this.well+this.wrong,text.length+1);
+
+                    
+                }
+            }
+        })
+    </script>
+</body>
+</html>
