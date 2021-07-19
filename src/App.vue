@@ -1,22 +1,70 @@
 <template>
-<div id="app" class="d-flex flex-column justify-content-center align-items-center" v-on:keydown="keyPressed">
-    <div id='container' class="p-2">
+<div id="app" class="row" v-on:keydown="keyPressed">
+
+    <div id="sidebar" class="col col-lg-2 p-2 d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px;">
+        <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
+        <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+        <span class="fs-4">Options</span>
+        </a>
+        <hr>
+        <ul class="nav nav-pills flex-column mb-auto">
+        <li class="nav-item">
+            <a href="#" class="nav-link active" aria-current="page">
+            <svg class="bi me-2" width="16" height="16"><use xlink:href="#home"></use></svg>
+            <input type="checkbox" 
+            >
+            Show statistics
+            </a>
+        </li>
+        <li>
+            <a href="#" class="nav-link text-white">
+            <svg class="bi me-2" width="16" height="16"><use xlink:href="#speedometer2"></use></svg>
+            <input type="checkbox" 
+            @click="changeVisibility"
+            >
+            Show timer
+            </a>
+        </li>
+        
+        </ul>
+        <hr>
+        <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
+            <strong>gtamani</strong>
+        </a>
+        
+        </div>
+    </div>
+    
+    
+    <div id='container' class="col">
+        <div class="h-100 p-5 text-white bg-dark rounded-3">
+          <h2>Type this sentence</h2>
+          <div>
+            <prompter
+            :text='text'
+            :opponent='opponentPosition'
+            :well='position'
+            :wrong='lettersToPosition'/>
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">✏️</span>
+            <input type="text" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <button class="btn btn-outline-light" type="button" @click="nextParagraph">Siguiente</button>
+    </div>
         <div id="clock" v-if="show">
             {{minutes}} : {{seconds}}      - {{speed}}
         </div>
-        <button @click="changeVisibility">Show/Don't show next letter</button>
-        <div>
-        <prompter
-        :text='text'
-        :opponent='opponentPosition'
-        :well='position'
-        :wrong='lettersToPosition'/>
-        </div>
+        <!--button @click="changeVisibility">Show/Don't show next letter</button-->
+        
         <div v-if="show">
             {{ nextLetter }} - {{position}} - {{lettersToPosition}} - {{words}} - {{opponentPosition}}
         </div>
-        <input type="text">
     </div>
+    
+    
 </div>
 </template>
 
@@ -30,8 +78,10 @@ export default {
     data () {
         return {
             // Text data
-            show: true,
-            text: 'Sin embargo, la posibilidad de utilizar publicidad en Wikipedia provocó una reacción de parte de los contribuyentes de la Wikipedia en español, motivo que llevó a la creación de la Enciclopedia Libre Universal en Español en febrero de 2002.',
+            show: false,
+            sentences: [],
+            sentenceNumber: 0,
+            text: 'Lengua, detalles llegas elegir ciudadano ninguno mi helicóptero perdedor entrada león decidí izquierda entienden mesa pérdida, cubrir aterrizar toma tienen preparada decirlo ciudadanos aguantar, bebé asunto llevaré creas solas mirada puerta, jardín invito oido chica alcalde prepara teme acaban costado sábado felicidad, temo hielo dc preparada pasaste fondos adonde ambulancia.',
             position: 0,
             lettersToPosition: 0,
             words: 0,
@@ -40,7 +90,7 @@ export default {
             sameLetter: false,
             // Opponent
             opponentPosition: 0,
-            opponentSpeed:40,
+            opponentSpeed:200,
             // Clock data
             minutes: 0,
             seconds: 0,
@@ -79,6 +129,14 @@ export default {
                 }
             }
         },
+        nextParagraph: function() {
+            this.sentenceNumber ++;
+            this.position = 0;
+            this.opponentPosition = 0;
+            this.opponentPosition = 0;
+            this.lettersToPosition = 0;
+            this.text = this.sentences[this.sentenceNumber]
+        },
         update: function () {
             let date = new Date(Date.now()) 
             this.difference = date.getTime() - this.started.getTime()
@@ -90,17 +148,33 @@ export default {
             this.nextLetter = this.text[0]
             setInterval(() => {
                 this.update()
+                if (this.position === this.text.length) {
+                    this.text = "USER WINS"
+                }
             }, 15)
         },
         opponentLoop: function () {
             setInterval(() => {
                 this.opponentPosition ++;
+                if (this.opponentPosition === this.text.length) {
+                    this.text = "MACHINE WINS"
+                }
             }, 60000 / this.opponentSpeed)
         }
     },
-    created () {
-        this.loop();
-        this.opponentLoop();
+    created () { 
+        const getSentences = async function () {
+            const res = await fetch("https://api.generadordni.es/v2/text/paragraphs?results=100&sentences=1&language=es")
+            const data = await res.json()
+            return data
+        }
+        const s = getSentences();
+        s.then(res => {
+            this.sentences = res;
+            this.text = this.sentences[this.sentenceNumber];
+            this.loop();
+            this.opponentLoop();
+        })
     }
 }
 </script>
@@ -110,20 +184,25 @@ export default {
     margin:0;
     padding:0;
 }
+#sidebar{
+    height:100vh;
+    margin:0;
+}
 #app{
+    position:relative;
     width:100vw;
     height:100vh;
+    background-color:#b1ccd3;
 }
 #container{
-    width:80%;
-    height: 40%;
-    border:1px solid black;
+    
+    /*border:1px solid black;*/
     text-align: center;
 }
 #red{
-    background-color: red;
+    background-color: #860F0F;
 }
 #green{
-    background-color: greenyellow;
+    background-color: #0F8637;
 }
 </style>

@@ -54,11 +54,11 @@ export default {
 
 <style>
 #prompter{
-    border:1px solid black;
+    /*border:1px solid black;*/
     padding:4rem;
 }
 #bar{
-    border-left: 1px solid black;
+    border-left: 1px solid white;
     animation: spark 1s infinite;
 }
 
