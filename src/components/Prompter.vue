@@ -10,6 +10,7 @@ export default {
             type: String,
         },
         opponent: Number,
+        activateOpponent: Boolean,
         well: Number,
         wrong: Number,
     },
@@ -32,14 +33,18 @@ export default {
             this.red = this.text.slice(point1,point2);
             this.left = this.text.slice(point2,point3);
             //
-            if (this.opponent > point2){
-                let opponent = this.opponent - point2
-                this.left = this.left.slice(0,opponent) + this.bar + this.left.slice(opponent,this.left.length)
-            } else if (this.opponent > point1) {
-                let opponent = this.opponent - point1
-                this.red = this.red.slice(0,opponent)+this.bar+this.red.slice(opponent,this.red.length)
-            } else {
-                this.green = this.green.slice(0,this.opponent)+this.bar+this.green.slice(this.opponent,this.green.length)
+
+            if (!this.activateOpponent) {
+
+                if (this.opponent > point2){
+                    let opponent = this.opponent - point2
+                    this.left = this.left.slice(0,opponent) + this.bar + this.left.slice(opponent,this.left.length)
+                } else if (this.opponent > point1) {
+                    let opponent = this.opponent - point1
+                    this.red = this.red.slice(0,opponent)+this.bar+this.red.slice(opponent,this.red.length)
+                } else {
+                    this.green = this.green.slice(0,this.opponent)+this.bar+this.green.slice(this.opponent,this.green.length)
+                }
             }
         }
     },
@@ -55,7 +60,7 @@ export default {
 <style>
 #prompter{
     /*border:1px solid black;*/
-    padding:4rem;
+    
 }
 #bar{
     border-left: 1px solid white;

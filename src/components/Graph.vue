@@ -1,6 +1,6 @@
 <template>
-<div id="graph">
-    <div id="myfirstchart" style="height: 250px;"></div>
+<div :id="isSpeed" class="graph-svg">
+    <div :id="isSpeed+isSpeed" ></div>
 </div>
 </template>
 
@@ -10,19 +10,24 @@ export default {
     name: 'Graph',
     data () {
         return {
-            data: [
-                { year: '2008', value: 20 },
-                { year: '2009', value: 10 },
-                { year: '2010', value: 4 },
-                { year: '2011', value: 13 },
-                { year: '2012', value: 20 }
-            ],
-            dataString:""
+            dataString:"",
+            dataset:[],
+            ykeys:"",
+            goal:"",
+            xmax:"",
         }
     },
     props: {
-        dataset:{
-            type: Array,
+        newData:{
+            type: Object,
+        },
+        isSpeed: String,
+    },
+    watch:{
+        newData: function () {
+            console.log("WATCHERRRRR",this.newData)
+            this.createComponents();
+            this.update();
         }
     },
     methods: {
@@ -39,36 +44,64 @@ export default {
                 script.setAttribute('src', scripts[i])
                 document.head.appendChild(script)
             }
+        },
+        createComponents: function () {
+            const graph = document.querySelector("#"+this.isSpeed);
+            try {
+                graph.removeChild(document.querySelector("#"+this.isSpeed+this.isSpeed));
+                graph.removeChild(document.querySelector("#graph-script"+this.isSpeed));
+            } catch {console.log("created!")}
+            let script = document.createElement('script')
+            let graphDiv = document.createElement('div')
+            script.setAttribute("id","graph-script"+this.isSpeed)
+            graphDiv.setAttribute("id",this.isSpeed+this.isSpeed)
+            graph.appendChild(script);
+            graph.appendChild(graphDiv);
+            //
+            this.ykeys = this.isSpeed === "g1" ? "speed" : "presition"
+            this.xmax = this.isSpeed === "auto" ? "speed" : "100"
+        },
+        update: function () {
+            this.dataString = "";
+            this.dataset.push(this.newData);
+            let i;
+            let code;
+            for (i=0;i < this.dataset.length;i++) {
+                this.dataString += JSON.stringify(this.dataset[i]) + ",\n"
+            }
+            console.log(this.dataString)
+            code = 
+            ` 
+                new Morris.Line({
+                    element: '`+this.isSpeed+this.isSpeed+`',
+                    data:[
+                        `+this.dataString+`
+                    ],
+                    xkey: 'try',
+                    ykeys: ['`+this.ykeys+`'],
+                    ymax:'`+this.xmax+`',
+                    ymin:'auto',
+                    labels: ['Speed'],
+                    hideHover: 'always',
+                    fillOpacity: 0.5
+                });
+            `
+            console.log(code);
+            document.querySelector("#graph-script"+this.isSpeed).innerHTML = code;
         }
     },
     mounted () {
+        console.log(this.isSpeed)
         this.loadMorris();
-        console.log(this.data)
-        const graph = document.querySelector("#graph");
-        let script = document.createElement('script')
-        let i;
-        for (i=0;i < this.data.length;i++) {
-            this.dataString += JSON.stringify(this.data[i]) + ",\n"
-        }
-        console.log(this.dataString)
-        const code = 
-        `
-            new Morris.Line({
-                element: 'myfirstchart',
-                data:[
-                    `+this.dataString+`
-                ],
-                xkey: 'year',
-                ykeys: ['value'],
-                labels: ['Value']
-            });
-        `
-        script.innerHTML = code;
-        graph.appendChild(script);
+        this.createComponents();
+        this.update();
+        console.log(this.newData)
     }
 }
 </script>
 
 <style>
-
+.graph-svg{
+    transform:scale(0.8);
+}
 </style>
