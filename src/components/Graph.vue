@@ -59,7 +59,7 @@ export default {
             graph.appendChild(graphDiv);
             //
             this.ykeys = this.isSpeed === "g1" ? "speed" : "presition"
-            this.xmax = this.isSpeed === "auto" ? "speed" : "100"
+            this.xmax = this.isSpeed === "g1" ? "auto" : "100"
         },
         update: function () {
             this.dataString = "";
@@ -83,6 +83,7 @@ export default {
                     ymin:'auto',
                     labels: ['Speed'],
                     hideHover: 'always',
+                    yLabelFormat: function (y) { return parseFloat(y).toFixed(2); },
                     fillOpacity: 0.5
                 });
             `
@@ -101,7 +102,22 @@ export default {
 </script>
 
 <style>
-.graph-svg{
-    transform:scale(0.8);
-}
+    .graph-svg{
+        transform:scale(0.8);
+        padding:0;
+        margin:0
+    }
+
+    @media (max-width: 600px) {
+        .graph-svg{
+            transform:scale(0.7);
+        }
+    }
+
+    @media (max-width: 450px) {
+        .graph-svg{
+            transform:scale(0.6);
+        }
+    }
+    
 </style>
