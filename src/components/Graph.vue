@@ -1,3 +1,11 @@
+<!--
+
+GRAPH'S COMPONENT
+
+@author: Giuliano Tamani
+
+-->
+
 <template>
 <div :id="isSpeed" class="graph-svg">
     <div :id="isSpeed+isSpeed" ></div>
@@ -32,6 +40,9 @@ export default {
     },
     methods: {
         loadMorris: function () {
+            /* Loads necessary scripts to run Morris, 
+               Javascript library to plot graphs */
+            
             const scripts = ["http://ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js",
                             "http://cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js",
                             "//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js",
@@ -46,6 +57,7 @@ export default {
             }
         },
         createComponents: function () {
+            /* Create components that Morris will use to place the data */
             const graph = document.querySelector("#"+this.isSpeed);
             try {
                 graph.removeChild(document.querySelector("#"+this.isSpeed+this.isSpeed));
@@ -57,11 +69,14 @@ export default {
             graphDiv.setAttribute("id",this.isSpeed+this.isSpeed)
             graph.appendChild(script);
             graph.appendChild(graphDiv);
-            //
+
+            // Set initial variables
             this.ykeys = this.isSpeed === "g1" ? "speed" : "presition"
             this.xmax = this.isSpeed === "g1" ? "auto" : "100"
         },
         update: function () {
+            /*  Update chart's info  */
+
             this.dataString = "";
             this.dataset.push(this.newData);
             let i;

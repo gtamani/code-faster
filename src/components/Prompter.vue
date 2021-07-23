@@ -1,3 +1,11 @@
+<!--
+
+PROMPTER'S COMPONENT
+
+@author: Giuliano Tamani
+
+-->
+
 <template>
 <div id="prompter" v-html="renderized"></div>
 </template>
@@ -16,23 +24,29 @@ export default {
     },
     data () {
         return {
-            bar: "<span id='bar'></span>",
-            green:"",
+            bar: "<span id='bar'></span>", // Html's code for opponent's vursor
+            green:"", //
             red:"",
             yellow:"",
             result:""
         }
     },
     methods: {
-        add_cursor: function () {
+        beforeRendering: function () {
+            /* Strips text in three segments: 
+                1. Code written correctly
+                2. Code written, but incorrect.
+                3. Code left to be written. */
+
             let point1 = this.well;
             let point2 = this.well+this.wrong;
             let point3 = this.text.length+1;
-            //
+            
             this.green = this.text.slice(0,point1);
             this.red = this.text.slice(point1,point2);
             this.left = this.text.slice(point2,point3);
-            //
+
+            /* Place opponent cursor before text rendering. */
 
             if (!this.activateOpponent) {
 
@@ -50,7 +64,7 @@ export default {
     },
     computed: {
         renderized(){
-            this.add_cursor()
+            this.beforeRendering()
             return "<span id='green'>"+this.green+"</span><span id='red'>"+this.red+"</span>"+this.left;
         }
     }
@@ -58,10 +72,7 @@ export default {
 </script>
 
 <style>
-#prompter{
-    /*border:1px solid black;*/
-    
-}
+
 #bar{
     border-left: 1px solid white;
     animation: spark 1s infinite;
