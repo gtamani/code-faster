@@ -2,6 +2,8 @@
 node_modules
 /dist
 
+testing.ts
+testing.js
 
 # local env files
 .env.local

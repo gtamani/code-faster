@@ -153,6 +153,8 @@ Made with Vue.js
 <script>
 import Prompter from './components/Prompter'
 import Graph from './components/Graph'
+import { DATA } from './data.js'
+import { METHODS } from './methods.js'
 
 export default {
     name: 'App',
@@ -160,197 +162,11 @@ export default {
         Prompter,
         Graph
     },
-    data () {
-        return {
-            // Switchers
-            activateTimer: true,
-            activateGraphs: true,
-            activateOpponentSpeed: false,
-
-            // 
-            sentences: [], // 
-            sentenceNumber: 0,
-            text: "",
-            position: 0,
-            lettersToPosition: 0,
-            started: "",
-            unvalidKeyCodes: [17, 16, 20, 9, 18, 27, 222, 13],
-            sameLetter: false,
-            nextLetter:"",
-            // Opponent
-            opponentPosition: 0,
-            opponentSpeed:200,
-            // Clock data
-            minutes: 0,
-            seconds: 0,
-            miliseconds: 0,
-            difference: 0,
-            speed: 0,
-            errors: 0,
-            presition: 100,
-            speedInput: "",
-            beggins: false,
-            finished: false,
-            win: "",
-            graphSpeedData:{try: 1, speed: 150 },
-            graphPresitionData: {try: 1, presition: 95 },  
-            try:1,
-            graph1:"g1",
-            graph2:"g2",
-        }
-    },
-    methods: {
-        keyPressed: function (e) {
-            /* Check's if the key pressed is correct or incorrect. */
-            if (!this.beggins) {
-                this.beggins = true;
-                this.started = new Date(Date.now());
-                document.querySelector("#clock-icon").style.animation = "seconds 1s infinite";
-                this.opponentLoop();
-            }
-            this.sameLetter = e.key === this.nextLetter;
-            if (this.unvalidKeyCodes.indexOf(e.keyCode) == -1) {
-                if (this.sameLetter && this.lettersToPosition == 0) {
-                    this.position++;
-                    const next = this.text[this.position];
-                    this.nextLetter = next;
-                } else {
-                    if (e.key === "Backspace") {
-                        if (this.position >= 0) {
-                            if (this.lettersToPosition === 0) {
-                                this.position--;
-                                const next = this.text[this.position];
-                                this.nextLetter = next;
-                            } else {
-                                this.lettersToPosition--;
-                            }
-                        }
-                    } else {
-                        this.lettersToPosition++;
-                        this.errors++;
-                    }
-                }
-            }
-        },
-        changeSpeed: function(e) {
-            /* Controls opponent's speed according to Option's configuration */
-
-            console.log(e,this.speedInput)
-            setTimeout(() => {
-                const messageDiv = document.querySelector("#message")
-                if (!this.beggins) {
-
-                    //console.log(document.querySelector("#speed").value)
-                    try {
-                        const number = parseInt(document.querySelector("#speed").value)
-                        if (number) {
-                            if (number >= 20 && number <= 1200) {
-                                this.opponentSpeed = number;
-                                messageDiv.innerHTML = ""
-
-                            } else {
-                                messageDiv.innerHTML = "Speed must be defined between 20-1200"
-                                this.opponentSpeed = 50;
-                            }
-                        } else {
-                            messageDiv.innerHTML = "That's not a number"
-                            this.opponentSpeed = 50;
-                        }
-                    } catch {
-                        document.querySelector("#message").innerHTML = "That's not a number"
-                    }
-                } else {
-                    messageDiv.innerHTML = "Wait the match ended to set a new speed"
-                } 
-            },10)
-        },
-        nextParagraph: function() {
-            /* Restore variables for a new test */
-            this.beggins = false;
-            this.finished = false;
-            this.sentenceNumber ++;
-            this.position = 0;
-            this.opponentPosition = 0;
-            this.opponentPosition = 0;
-            this.lettersToPosition = 0;
-            this.speed = 0;
-            this.presition = 0;
-            this.errors = 0;
-            this.text = this.sentences[this.sentenceNumber]
-            this.nextLetter = this.text[0]
-            document.querySelector("#header").innerHTML = "Type this sentence 👇"
-            this.loop();
-        },
-        update: function () {
-            /* Update clock's info when game is running */
-
-            let date = new Date(Date.now()) 
-            this.difference = date.getTime() - this.started.getTime()
-            this.minutes = parseInt(this.difference / 60000)
-            this.seconds = ((this.difference - this.minutes*60000) / 1000).toFixed(2)
-            this.speed = parseFloat(60000 / (this.difference / this.position)).toFixed(2)
-            this.presition = this.position ? 100 - parseFloat((this.errors/this.position)*100).toFixed(2) : 0
-            if(this.presition < 0) {this.presition = 0}
-        },
-        
-        gameEnded: function (has_won) {
-            /* Determinates the winner when game's finished,
-                Change frontend 
-                
-                prop: has_won - Boolean. Has the player won?
-            */
-
-            const result = has_won ? "Win" : "Loose"
-            this.text = ""
-            this.win = has_won;
-            this.finished = true;
-            this.beggins = false;
-            document.querySelector("#clock-icon").style.animation = "none";
-            document.querySelector("#header").innerHTML = "You "+result
-            this.addToGraph();
-        },
-        loop: function () {
-            /* Player's main loop */
-
-            this.started = new Date(Date.now()),
-            this.nextLetter = this.text[0]
-            const r = setInterval(() => {
-                if (this.beggins) {
-                    this.update()
-                }
-                if (this.position === this.text.length) {
-                    this.gameEnded(true)
-                    clearInterval(r);
-                } else if (this.finished) {
-                    clearInterval(r);
-                }
-            }, 15)
-        },
-        opponentLoop: function () {
-            /* Opponent's loop */
-
-            const r = setInterval(() => {
-                this.opponentPosition ++;
-                if (this.opponentPosition === this.text.length) {
-                    this.gameEnded(false)
-                    clearInterval(r);
-                } else if (this.finished) {
-                    clearInterval(r);
-                }
-            }, 60000 / this.opponentSpeed)
-        },
-        addToGraph: function () {
-            /* Add new data to the graph */
-
-            this.try++;
-            this.graphSpeedData = { try: this.try, speed: parseFloat(this.speed)}
-            this.graphPresitionData = { try: this.try, presition: parseFloat(this.presition) }
-            console.log(this.graphSpeedData.length,this.graphPresitionData.length)
-        }
-    },
+    data () { return DATA },
+    methods: METHODS,
     created () {
+        console.log(DATA)
         /* Get random sentences from 'GeneradorDni' API */
-
         const getSentences = async function () {
             const res = await fetch("https://api.generadordni.es/v2/text/paragraphs?results=100&sentences=1&language=es")
             if (res.status == 200) {
@@ -362,7 +178,6 @@ export default {
         }
         const s = getSentences();
         s.then(res => {
-            console.log("asd",res.status);
             this.sentences = res;
             this.text = this.sentences[this.sentenceNumber];
             this.loop();
